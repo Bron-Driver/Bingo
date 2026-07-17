@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face-to-Face Meeting Bingo</title>
+    <!-- Include html2canvas via a reliable CDN for image exporting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #f07167;
+            --secondary-color: #00afb9;
+            --bg-card: #f8f9fa;
+            --bg-free: #fed9b7;
+            --border-color: #dee2e6;
+            --text-color: #212529;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #ffffff;
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+            font-size: 2rem;
+            text-align: center;
+        }
+
+        p {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #6c757d;
+            text-align: center;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #reroll-btn {
+            background-color: var(--primary-color);
+        }
+
+        #reroll-btn:hover {
+            background-color: #df5e54;
+        }
+
+        #save-btn {
+            background-color: var(--secondary-color);
+        }
+
+        #save-btn:hover {
+            background-color: #008f99;
+        }
+
+        /* Wrapper ensures clean padding when exporting to an image */
+        .bingo-export-wrapper {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .header-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .header-letter {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .bingo-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .bingo-cell {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-card);
+            height: 110px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 0.8rem;
+            line-height: 1.2;
+            word-wrap: break-word;
+            user-select: none;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        .bingo-cell:active {
+            transform: scale(0.95);
+        }
+
+        .bingo-cell.marked {
+            background-color: #d8f3dc;
+            border-color: #b7e4c7;
+            font-weight: bold;
+        }
+
+        .bingo-cell.free-space {
+            border: 2px dashed var(--primary-color);
+            background-color: var(--bg-free);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🎲 Face-to-Face Meeting Bingo</h1>
+    <p>Tap a square to mark it off, or save your card as an image!</p>
+
+    <div class="button-group">
+        <button id="reroll-btn">🔄 Generate New Card</button>
+        <button id="save-btn">💾 Save Card (PNG)</button>
+    </div>
+
+    <!-- The wrapper captures everything inside it cleanly -->
+    <div id="bingo-capture-area" class="bingo-export-wrapper">
+        <div class="header-row">
+            <div class="header-letter">B</div>
+            <div class="header-letter">I</div>
+            <div class="header-letter">N</div>
+            <div class="header-letter">G</div>
+            <div class="header-letter">O</div>
+        </div>
+        <div id="grid" class="bingo-grid"></div>
+    </div>
+
+    <script>
+        const JARGON_POOL = [
+            "Someone leans in and whispers to their neighbor",
+            "Loud pen clicking or tapping",
+            "Let's take this offline.",
+            "Awkward silence after a question",
+            "Someone struggles with the meeting room tech/projector",
+            "A phone vibrates loudly on the hard table",
+            "Synergy / Paradigm shift",
+            "Someone sneaks a look at their phone under the table",
+            "Awkward eye contact across the room",
+            "Two people talk over each other trying to jump in",
+            "We're just waiting on a few more people to arrive.",
+            "Let's pivot.",
+            "Someone walks in late and does the apologetic wave",
+            "Someone is clearly doodling on their notepad",
+            "Touch base",
+            "Can everyone see the screen? (Pointing to projector)",
+            "Let's circle back to that.",
+            "The room temperature is debated (too hot / too cold)",
+            "I'll give you back X minutes of your day.",
+            "Moving the needle",
+            "Low-hanging fruit",
+            "Quick temperature check?",
+            "Someone brought snacks or coffee for themselves only",
+            "Let's un-pack that.",
+            "Comfort break / Bio-break",
+            "Let's put a pin in that.",
+            "Value add",
+            "At the end of the day",
+            "Deep dive",
+            "Someone opens/closes a window or adjusts the blinds"
+        ];
+
+        function shuffleAndGenerate() {
+            const gridContainer = document.getElementById('grid');
+            gridContainer.innerHTML = '';
+
+            let poolCopy = [...JARGON_POOL];
+            for (let i = poolCopy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [poolCopy[i], poolCopy[j]] = [poolCopy[j], poolCopy[i]];
+            }
+
+            let selectedItems = poolCopy.slice(0, 24);
+            selectedItems.splice(12, 0, "FREE SPACE");
+
+            selectedItems.forEach((text) => {
+                const cell = document.createElement('div');
+                cell.classList.add('bingo-cell');
+
+                if (text === "FREE SPACE") {
+                    cell.innerHTML = "✨ FREE SPACE ✨";
+                    cell.classList.add('free-space');
+                } else {
+                    cell.textContent = text;
+                    cell.addEventListener('click', () => {
+                        cell.classList.toggle('marked');
+                    });
+                }
+
+                gridContainer.appendChild(cell);
+            });
+        }
+
+        function saveCardAsImage() {
+            const captureArea = document.getElementById('bingo-capture-area');
+
+            // Generate canvas configuration to ensure sharp layout rendering
+            html2canvas(captureArea, {
+                scale: 2, // Double quality size for crisp text
+                backgroundColor: "#ffffff",
+                logging: false
+            }).then(canvas => {
+                // Convert canvas data to a downloadable URL link
+                const imageURL = canvas.toDataURL('image/png');
+                const downloadLink = document.createElement('a');
+
+                // Add an accurate, unique timestamp to the filename
+                const uniqueId = Math.floor(1000 + Math.random() * 9000);
+                downloadLink.download = `Meeting_Bingo_Card_${uniqueId}.png`;
+                downloadLink.href = imageURL;
+
+                // Trigger download sequence
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            });
+        }
+
+        // Event listeners
+        document.getElementById('reroll-btn').addEventListener('click', shuffleAndGenerate);
+        document.getElementById('save-btn').addEventListener('click', saveCardAsImage);
+
+        // Initial grid generation
+        window.addEventListener('DOMContentLoaded', shuffleAndGenerate);
+    </script>
+</body>
+
+</html>
