@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dabbable Meeting Bingo</title>
+    <title>Interactive Meeting & Icebreaker Bingo</title>
     <style>
-        /* CSS Variables to handle instant theme switching */
+        /* CSS Variables for Light/Dark Mode theme switching */
         :root {
             --bg-body: #ffffff;
             --bg-container: #ffffff;
@@ -24,7 +24,6 @@
             --text-dab: #1b4332;
         }
 
-        /* Dark Mode overrides */
         [data-theme="dark"] {
             --bg-body: #121212;
             --bg-container: #1e1e1e;
@@ -55,10 +54,29 @@
 
         .top-bar {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: center;
             width: 100%;
             max-width: 600px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+
+        .menu-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        select {
+            padding: 6px 12px;
+            font-size: 0.9rem;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            cursor: pointer;
+            font-weight: bold;
         }
 
         h1 {
@@ -72,7 +90,8 @@
             margin-bottom: 20px;
             color: var(--text-sub);
             text-align: center;
-            max-width: 400px;
+            max-width: 450px;
+            font-size: 0.95rem;
         }
 
         .button-group {
@@ -169,7 +188,7 @@
             border: 1px solid var(--border-color);
             border-radius: 8px;
             background-color: var(--bg-card);
-            height: 110px;
+            height: 115px;
             padding: 8px;
             display: flex;
             align-items: center;
@@ -212,11 +231,19 @@
 <body>
 
     <div class="top-bar">
+        <div class="menu-group">
+            <label for="card-type" style="font-weight: bold; font-size: 0.9rem;">Game Mode:</label>
+            <select id="card-type">
+                <option value="jargon">Boardroom Jargon</option>
+                <option value="icebreaker">Icebreaker: Find Someone Who...</option>
+            </select>
+        </div>
         <button id="theme-toggle">🌙 Dark Mode</button>
     </div>
 
-    <h1>🎲 Dabbable Meeting Bingo</h1>
-    <p>1. Generate a card. 2. Lock it to activate "Play Mode." 3. "Dab" squares during the meeting!</p>
+    <h1 id="game-title">🎲 Dabbable Meeting Bingo</h1>
+    <p id="game-instructions">1. Generate a card. 2. Lock it to activate "Play Mode." 3. "Dab" squares during the
+        meeting!</p>
 
     <div class="button-group">
         <button id="reroll-btn">🔄 New Card</button>
@@ -235,38 +262,71 @@
     </div>
 
     <script>
-        const JARGON_POOL = [
-            "Someone leans in and whispers to their neighbor",
-            "Loud pen clicking or tapping",
-            "Let's take this offline.",
-            "Awkward silence after a question",
-            "Someone struggles with the meeting room tech/projector",
-            "A phone vibrates loudly on the hard table",
-            "Synergy / Paradigm shift",
-            "Someone sneaks a look at their phone under the table",
-            "Awkward eye contact across the room",
-            "Two people talk over each other trying to jump in",
-            "We're just waiting on a few more people to arrive.",
-            "Let's pivot.",
-            "Someone walks in late and does the apologetic wave",
-            "Someone is clearly doodling on their notepad",
-            "Touch base",
-            "Can everyone see the screen? (Pointing to projector)",
-            "Let's circle back to that.",
-            "The room temperature is debated (too hot / too cold)",
-            "I'll give you back X minutes of your day.",
-            "Moving the needle",
-            "Low-hanging fruit",
-            "Quick temperature check?",
-            "Someone brought snacks or coffee for themselves only",
-            "Let's un-pack that.",
-            "Comfort break / Bio-break",
-            "Let's put a pin in that.",
-            "Value add",
-            "At the end of the day",
-            "Deep dive",
-            "Someone opens/closes a window or adjusts the blinds"
-        ];
+        // Separate item pools for different styles of play
+        const DECK_POOLS = {
+            jargon: [
+                "Someone leans in and whispers to their neighbor",
+                "Loud pen clicking or tapping",
+                "Let's take this offline.",
+                "Awkward silence after a question",
+                "Someone struggles with the meeting room tech/projector",
+                "A phone vibrates loudly on the hard table",
+                "Synergy / Paradigm shift",
+                "Someone sneaks a look at their phone under the table",
+                "Awkward eye contact across the room",
+                "Two people talk over each other trying to jump in",
+                "We're just waiting on a few more people to arrive.",
+                "Let's pivot.",
+                "Someone walks in late and does the apologetic wave",
+                "Someone is clearly doodling on their notepad",
+                "Touch base",
+                "Can everyone see the screen? (Pointing to projector)",
+                "Let's circle back to that.",
+                "The room temperature is debated (too hot / too cold)",
+                "I'll give you back X minutes of your day.",
+                "Moving the needle",
+                "Low-hanging fruit",
+                "Quick temperature check?",
+                "Someone brought snacks or coffee for themselves only",
+                "Let's un-pack that.",
+                "Comfort break / Bio-break",
+                "Let's put a pin in that.",
+                "Value add",
+                "At the end of the day",
+                "Deep dive",
+                "Someone opens/closes a window or adjusts the blinds"
+            ],
+            icebreaker: [
+                "Has a pet that isn't a cat or a dog",
+                "Speaks more than one language fluently",
+                "Has run a marathon or a half-marathon",
+                "Has a tattoo",
+                "Is left-handed",
+                "Born in a different country",
+                "Can play a musical instrument",
+                "Has never broken a bone",
+                "Loves pineapple on pizza",
+                "Has met a celebrity",
+                "Prefers tea over coffee",
+                "Has a winter birthday (Dec - Feb)",
+                "Has worked here for more than 5 years",
+                "Travelled outside the country this past year",
+                "Is wearing something blue today",
+                "Knows how to knit or crochet",
+                "Has been scuba diving or skydiving",
+                "Is the oldest or an only child",
+                "Has baked their own bread from scratch",
+                "Can whistle loudly using their fingers",
+                "Owns a vintage camera or vinyl record player",
+                "Has stayed up all night to finish a book or video game",
+                "Doesn't drink coffee at all",
+                "Can juggle three or more objects",
+                "Has a collection of something unusual",
+                "Prefers a physical book over an e-reader",
+                "Has successfully kept a houseplant alive for over a year",
+                "Has been to a music festival"
+            ]
+        };
 
         let playModeActive = false;
 
@@ -276,13 +336,22 @@
             const gridContainer = document.getElementById('grid');
             gridContainer.innerHTML = '';
 
-            let poolCopy = [...JARGON_POOL];
+            const selectedDeck = document.getElementById('card-type').value;
+            let poolCopy = [...DECK_POOLS[selectedDeck]];
+
+            // Fisher-Yates Shuffle
             for (let i = poolCopy.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [poolCopy[i], poolCopy[j]] = [poolCopy[j], poolCopy[i]];
             }
 
             let selectedItems = poolCopy.slice(0, 24);
+
+            // For Icebreaker, format strings nicely to prompt interactions
+            if (selectedDeck === 'icebreaker') {
+                selectedItems = selectedItems.map(item => `Find someone who... <br><strong>${item}</strong>`);
+            }
+
             selectedItems.splice(12, 0, "FREE SPACE");
 
             selectedItems.forEach((text) => {
@@ -294,7 +363,7 @@
                     cell.classList.add('free-space');
                     cell.classList.add('dabbed');
                 } else {
-                    cell.textContent = text;
+                    cell.innerHTML = text;
                 }
 
                 cell.addEventListener('click', () => handleCellDab(cell));
@@ -312,16 +381,19 @@
             playModeActive = !playModeActive;
             const rerollBtn = document.getElementById('reroll-btn');
             const playBtn = document.getElementById('play-mode-btn');
+            const menuSelect = document.getElementById('card-type');
             const body = document.body;
 
             if (playModeActive) {
                 rerollBtn.disabled = true;
+                menuSelect.disabled = true; // Lock dropdown during active gameplay
                 playBtn.innerHTML = '🔓 Playing... (Unlock)';
                 playBtn.classList.add('active');
                 body.classList.add('play-mode-active');
                 clearDabsExceptFreeSpace();
             } else {
                 rerollBtn.disabled = false;
+                menuSelect.disabled = false;
                 playBtn.innerHTML = '🔒 Play / Lock Card';
                 playBtn.classList.remove('active');
                 body.classList.remove('play-mode-active');
@@ -339,6 +411,22 @@
             });
         }
 
+        // Handle updating static headers/instructions based on the selected mode
+        function updateUIModeText() {
+            const selectedDeck = document.getElementById('card-type').value;
+            const title = document.getElementById('game-title');
+            const instructions = document.getElementById('game-instructions');
+
+            if (selectedDeck === 'icebreaker') {
+                title.innerHTML = "🎲 Icebreaker Bingo";
+                instructions.innerHTML = "1. Roll a card. 2. Lock it. 3. Chat around the room and tap a square when you find a match!";
+            } else {
+                title.innerHTML = "🎲 Boardroom Bingo";
+                instructions.innerHTML = "1. Roll a card. 2. Lock it. 3. Watch the room closely and tap squares when actions happen live!";
+            }
+            shuffleAndGenerate();
+        }
+
         // Theme Toggle Logic
         const themeToggle = document.getElementById('theme-toggle');
         themeToggle.addEventListener('click', () => {
@@ -352,8 +440,12 @@
             }
         });
 
+        // Event listeners
+        document.getElementById('card-type').addEventListener('change', updateUIModeText);
         document.getElementById('reroll-btn').addEventListener('click', shuffleAndGenerate);
         document.getElementById('play-mode-btn').addEventListener('click', togglePlayMode);
+
+        // Initial Startup
         window.addEventListener('DOMContentLoaded', shuffleAndGenerate);
     </script>
 </body>
