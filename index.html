@@ -12,22 +12,28 @@
     <style>
         :root {
             --bg-card-default: #f8f9fa;
+            --text-cell: #212529;
             --bg-free: #fed9b7;
             --text-free: #212529;
             --border-free: #f07167;
             --bg-dabbed: #d8f3dc;
             --text-dabbed: #1b4332;
             --border-dabbed: #b7e4c7;
+            --bg-board: #ffffff;
+            /* Light mode main board background */
         }
 
         [data-theme="dark"] {
             --bg-card-default: #2b2b2b;
+            --text-cell: #f8f9fa;
             --bg-free: #4a2810;
             --text-free: #ffddd2;
             --border-free: #f07167;
             --bg-dabbed: #1b4332;
             --text-dabbed: #d8f3dc;
             --border-dabbed: #2d6a4f;
+            --bg-board: #1e1e1e;
+            /* Dark mode main board background */
         }
 
         body {
@@ -35,32 +41,43 @@
             min-height: 100vh;
         }
 
+        /* Forces the main container card to properly respect the theme */
+        .main-bingo-card {
+            background-color: var(--bg-board) !important;
+            transition: background-color 0.3s;
+        }
+
         .bingo-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 8px;
+            width: 100%;
         }
 
         .bingo-cell {
             background-color: var(--bg-card-default);
+            color: var(--text-cell);
             aspect-ratio: 1 / 1;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            font-size: calc(0.52rem + 0.38vw);
+            font-size: calc(0.5rem + 0.35vw);
             line-height: 1.2;
             padding: 6px;
             user-select: none;
             cursor: not-allowed;
             transition: all 0.2s ease;
             border: 1px solid var(--bs-border-color);
+            min-width: 0;
+            overflow: hidden;
+            word-break: break-word;
         }
 
         @media (max-width: 576px) {
             .bingo-cell {
-                font-size: calc(0.42rem + 0.48vw);
-                padding: 3px;
+                font-size: calc(0.4rem + 0.45vw);
+                padding: 4px;
             }
         }
 
@@ -125,19 +142,19 @@
         </div>
 
         <!-- Main Card Canvas Interface Wrapper -->
-        <div class="card shadow-sm border-0 p-3 p-sm-4 bg-body">
+        <div class="card main-bingo-card shadow-sm border-0 p-3 p-sm-4 text-body">
             <!-- Dynamic Subtitle Context Instruction Banner -->
             <div id="prompt-banner" class="alert alert-info text-center py-2 fw-bold mb-3 shadow-sm border-0 d-none">
                 <i class="bi bi-search me-1"></i> Find someone who...
             </div>
 
-            <!-- Standard Header Alphabetic Row Structure -->
-            <div class="row g-0 text-center mb-2 text-danger style-letters">
-                <div class="col fw-bold">B</div>
-                <div class="col fw-bold">I</div>
-                <div class="col fw-bold">N</div>
-                <div class="col fw-bold">G</div>
-                <div class="col fw-bold">O</div>
+            <!-- Standard Header Alphabetic Row Structure using the same grid wrapper -->
+            <div class="bingo-grid text-center mb-2 text-danger fw-bold fs-3">
+                <div>B</div>
+                <div>I</div>
+                <div>N</div>
+                <div>G</div>
+                <div>O</div>
             </div>
 
             <!-- Programmatic Input Target Node Injection Area -->
@@ -330,7 +347,6 @@
             const rerollBtn = document.getElementById('reroll-btn');
             const playBtn = document.getElementById('play-mode-btn');
             const menuSelect = document.getElementById('card-type');
-            const body = document.body;
 
             if (playModeActive) {
                 rerollBtn.disabled = true;
@@ -338,7 +354,7 @@
                 playBtn.innerHTML = '<i class="bi bi-unlock-fill"></i> Playing...';
                 playBtn.classList.replace('btn-secondary', 'btn-info');
                 playBtn.classList.add('text-white');
-                body.classList.add('play-mode-active');
+                document.body.classList.add('play-mode-active');
                 clearDabsExceptFreeSpace();
             } else {
                 rerollBtn.disabled = false;
@@ -346,7 +362,7 @@
                 playBtn.innerHTML = '<i class="bi bi-lock-fill"></i> Play / Lock Card';
                 playBtn.classList.replace('btn-info', 'btn-secondary');
                 playBtn.classList.remove('text-white');
-                body.classList.remove('play-mode-active');
+                document.body.classList.remove('play-mode-active');
             }
         }
 
