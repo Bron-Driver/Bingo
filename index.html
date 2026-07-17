@@ -4,13 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Face-to-Face Meeting Bingo</title>
-    <!-- Include html2canvas via a reliable CDN for image exporting -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <title>Dabbable Meeting Bingo</title>
     <style>
         :root {
             --primary-color: #f07167;
             --secondary-color: #00afb9;
+            --dab-color: #d8f3dc;
+            /* Light green "dab" */
+            --dab-border: #b7e4c7;
             --bg-card: #f8f9fa;
             --bg-free: #fed9b7;
             --border-color: #dee2e6;
@@ -26,6 +27,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            overflow-x: hidden;
         }
 
         h1 {
@@ -39,6 +41,7 @@
             margin-bottom: 20px;
             color: #6c757d;
             text-align: center;
+            max-width: 400px;
         }
 
         .button-group {
@@ -55,7 +58,10 @@
             font-weight: bold;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         #reroll-btn {
@@ -66,22 +72,32 @@
             background-color: #df5e54;
         }
 
-        #save-btn {
+        #reroll-btn:disabled {
+            background-color: #e2a5a0;
+            cursor: not-allowed;
+        }
+
+        /* "Play Mode" toggle button state */
+        #play-mode-btn {
+            background-color: #6c757d;
+        }
+
+        #play-mode-btn:hover {
+            background-color: #5a6268;
+        }
+
+        #play-mode-btn.active {
             background-color: var(--secondary-color);
         }
 
-        #save-btn:hover {
-            background-color: #008f99;
-        }
-
-        /* Wrapper ensures clean padding when exporting to an image */
-        .bingo-export-wrapper {
+        .bingo-container {
             background-color: #ffffff;
             padding: 20px;
             border-radius: 12px;
             max-width: 600px;
             width: 100%;
             box-sizing: border-box;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .header-row {
@@ -110,6 +126,7 @@
             border-radius: 8px;
             background-color: var(--bg-card);
             height: 110px;
+            /* Comfortably fits longer phrases */
             padding: 8px;
             display: flex;
             align-items: center;
@@ -117,43 +134,52 @@
             text-align: center;
             font-size: 0.8rem;
             line-height: 1.2;
-            word-wrap: break-word;
             user-select: none;
-            cursor: pointer;
-            transition: transform 0.1s, background-color 0.2s;
+            position: relative;
+            cursor: not-allowed;
+            /* By default, squares aren't clickable until play mode */
+            transition: background-color 0.2s, border-color 0.2s;
         }
 
-        .bingo-cell:active {
-            transform: scale(0.95);
-        }
-
-        .bingo-cell.marked {
-            background-color: #d8f3dc;
-            border-color: #b7e4c7;
-            font-weight: bold;
-        }
-
+        /* Free Space always unlocked */
         .bingo-cell.free-space {
             border: 2px dashed var(--primary-color);
             background-color: var(--bg-free);
             font-weight: bold;
             font-size: 0.9rem;
+            cursor: pointer;
+            /* Always clickable */
+        }
+
+        /* Active "Dabbing" style applied when cell is clicked in Play Mode */
+        .bingo-cell.dabbed {
+            background-color: var(--dab-color);
+            border-color: var(--dab-border);
+            font-weight: bold;
+        }
+
+        /* Enable interaction in Play Mode */
+        body.play-mode-active .bingo-cell {
+            cursor: pointer;
+        }
+
+        body.play-mode-active .bingo-cell:hover:not(.dabbed) {
+            background-color: #f1f3f5;
         }
     </style>
 </head>
 
 <body>
 
-    <h1>🎲 Face-to-Face Meeting Bingo</h1>
-    <p>Tap a square to mark it off, or save your card as an image!</p>
+    <h1>🎲 Dabbable Meeting Bingo</h1>
+    <p>1. Generate a card. 2. Lock it to activate "Play Mode." 3. "Dab" squares during the meeting!</p>
 
     <div class="button-group">
-        <button id="reroll-btn">🔄 Generate New Card</button>
-        <button id="save-btn">💾 Save Card (PNG)</button>
+        <button id="reroll-btn">🔄 New Card</button>
+        <button id="play-mode-btn">🔒 Play / Lock Card</button>
     </div>
 
-    <!-- The wrapper captures everything inside it cleanly -->
-    <div id="bingo-capture-area" class="bingo-export-wrapper">
+    <div class="bingo-container">
         <div class="header-row">
             <div class="header-letter">B</div>
             <div class="header-letter">I</div>
@@ -198,7 +224,11 @@
             "Someone opens/closes a window or adjusts the blinds"
         ];
 
+        let playModeActive = false;
+
         function shuffleAndGenerate() {
+            if (playModeActive) return; // Prevent new cards while playing
+
             const gridContainer = document.getElementById('grid');
             gridContainer.innerHTML = '';
 
@@ -211,52 +241,71 @@
             let selectedItems = poolCopy.slice(0, 24);
             selectedItems.splice(12, 0, "FREE SPACE");
 
-            selectedItems.forEach((text) => {
+            selectedItems.forEach((text, index) => {
                 const cell = document.createElement('div');
                 cell.classList.add('bingo-cell');
 
                 if (text === "FREE SPACE") {
                     cell.innerHTML = "✨ FREE SPACE ✨";
                     cell.classList.add('free-space');
+                    cell.classList.add('dabbed'); // Start dabbed
                 } else {
                     cell.textContent = text;
-                    cell.addEventListener('click', () => {
-                        cell.classList.toggle('marked');
-                    });
                 }
 
+                // Add click listener to handle dabbing
+                cell.addEventListener('click', () => handleCellDab(cell));
                 gridContainer.appendChild(cell);
             });
         }
 
-        function saveCardAsImage() {
-            const captureArea = document.getElementById('bingo-capture-area');
+        // Handle applying/removing the "dab" effect
+        function handleCellDab(cell) {
+            // Only allow dabbing/undabbing if we are in play mode,
+            // OR if it's the free space (which is always allowed).
+            if (playModeActive || cell.classList.contains('free-space')) {
+                cell.classList.toggle('dabbed');
+            }
+        }
 
-            // Generate canvas configuration to ensure sharp layout rendering
-            html2canvas(captureArea, {
-                scale: 2, // Double quality size for crisp text
-                backgroundColor: "#ffffff",
-                logging: false
-            }).then(canvas => {
-                // Convert canvas data to a downloadable URL link
-                const imageURL = canvas.toDataURL('image/png');
-                const downloadLink = document.createElement('a');
+        // Toggle game state between "Generate" and "Play" modes
+        function togglePlayMode() {
+            playModeActive = !playModeActive;
 
-                // Add an accurate, unique timestamp to the filename
-                const uniqueId = Math.floor(1000 + Math.random() * 9000);
-                downloadLink.download = `Meeting_Bingo_Card_${uniqueId}.png`;
-                downloadLink.href = imageURL;
+            const rerollBtn = document.getElementById('reroll-btn');
+            const playBtn = document.getElementById('play-mode-btn');
+            const body = document.body;
 
-                // Trigger download sequence
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
+            if (playModeActive) {
+                rerollBtn.disabled = true;
+                playBtn.innerHTML = '🔓 Playing... (Unlock)';
+                playBtn.classList.add('active');
+                body.classList.add('play-mode-active');
+                // Optional: Clear any accidental dabs before game starts
+                clearDabsExceptFreeSpace();
+            } else {
+                rerollBtn.disabled = false;
+                playBtn.innerHTML = '🔒 Play / Lock Card';
+                playBtn.classList.remove('active');
+                body.classList.remove('play-mode-active');
+            }
+        }
+
+        // Clear all dabs, resetting only the free space to marked
+        function clearDabsExceptFreeSpace() {
+            const cells = document.querySelectorAll('.bingo-cell');
+            cells.forEach(cell => {
+                if (cell.classList.contains('free-space')) {
+                    cell.classList.add('dabbed'); // keep free space dabbed
+                } else {
+                    cell.classList.remove('dabbed'); // clear other dabs
+                }
             });
         }
 
         // Event listeners
         document.getElementById('reroll-btn').addEventListener('click', shuffleAndGenerate);
-        document.getElementById('save-btn').addEventListener('click', saveCardAsImage);
+        document.getElementById('play-mode-btn').addEventListener('click', togglePlayMode);
 
         // Initial grid generation
         window.addEventListener('DOMContentLoaded', shuffleAndGenerate);
