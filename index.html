@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Meeting & Icebreaker Bingo</title>
     <style>
-        /* CSS Variables for Light/Dark Mode theme switching */
         :root {
             --bg-body: #ffffff;
             --bg-container: #ffffff;
@@ -163,6 +162,20 @@
             transition: background-color 0.3s;
         }
 
+        /* Dynamic Prompt Banner above the grid */
+        .prompt-banner {
+            display: none;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            padding: 8px;
+            background-color: var(--bg-card);
+            border-radius: 6px;
+            border: 1px dashed var(--border-color);
+        }
+
         .header-row {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -235,7 +248,7 @@
             <label for="card-type" style="font-weight: bold; font-size: 0.9rem;">Game Mode:</label>
             <select id="card-type">
                 <option value="jargon">Boardroom Jargon</option>
-                <option value="icebreaker">Icebreaker: Find Someone Who...</option>
+                <option value="icebreaker">Icebreaker</option>
             </select>
         </div>
         <button id="theme-toggle">🌙 Dark Mode</button>
@@ -251,6 +264,9 @@
     </div>
 
     <div class="bingo-container">
+        <!-- New Instruction Banner located right inside the container card -->
+        <div id="prompt-banner" class="prompt-banner">🔍 Find someone who...</div>
+
         <div class="header-row">
             <div class="header-letter">B</div>
             <div class="header-letter">I</div>
@@ -262,7 +278,6 @@
     </div>
 
     <script>
-        // Separate item pools for different styles of play
         const DECK_POOLS = {
             jargon: [
                 "Someone leans in and whispers to their neighbor",
@@ -339,19 +354,12 @@
             const selectedDeck = document.getElementById('card-type').value;
             let poolCopy = [...DECK_POOLS[selectedDeck]];
 
-            // Fisher-Yates Shuffle
             for (let i = poolCopy.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [poolCopy[i], poolCopy[j]] = [poolCopy[j], poolCopy[i]];
             }
 
             let selectedItems = poolCopy.slice(0, 24);
-
-            // For Icebreaker, format strings nicely to prompt interactions
-            if (selectedDeck === 'icebreaker') {
-                selectedItems = selectedItems.map(item => `Find someone who... <br><strong>${item}</strong>`);
-            }
-
             selectedItems.splice(12, 0, "FREE SPACE");
 
             selectedItems.forEach((text) => {
@@ -363,7 +371,7 @@
                     cell.classList.add('free-space');
                     cell.classList.add('dabbed');
                 } else {
-                    cell.innerHTML = text;
+                    cell.textContent = text; // Clean layout without repeating html formatting
                 }
 
                 cell.addEventListener('click', () => handleCellDab(cell));
@@ -386,7 +394,7 @@
 
             if (playModeActive) {
                 rerollBtn.disabled = true;
-                menuSelect.disabled = true; // Lock dropdown during active gameplay
+                menuSelect.disabled = true;
                 playBtn.innerHTML = '🔓 Playing... (Unlock)';
                 playBtn.classList.add('active');
                 body.classList.add('play-mode-active');
@@ -411,23 +419,25 @@
             });
         }
 
-        // Handle updating static headers/instructions based on the selected mode
         function updateUIModeText() {
             const selectedDeck = document.getElementById('card-type').value;
             const title = document.getElementById('game-title');
             const instructions = document.getElementById('game-instructions');
+            const banner = document.getElementById('prompt-banner');
 
             if (selectedDeck === 'icebreaker') {
                 title.innerHTML = "🎲 Icebreaker Bingo";
-                instructions.innerHTML = "1. Roll a card. 2. Lock it. 3. Chat around the room and tap a square when you find a match!";
+                instructions.innerHTML = "1. Roll a card. 2. Lock it. 3. Chat around the room to fill your board!";
+                banner.style.display = "block"; // Show "Find someone who..." banner
             } else {
                 title.innerHTML = "🎲 Boardroom Bingo";
-                instructions.innerHTML = "1. Roll a card. 2. Lock it. 3. Watch the room closely and tap squares when actions happen live!";
+                instructions.innerHTML = "1. Roll a card. 2. Lock it. 3. Watch the room closely and tap squares live!";
+                banner.style.display = "none";  // Hide banner
             }
             shuffleAndGenerate();
         }
 
-        // Theme Toggle Logic
+        // Theme Toggle
         const themeToggle = document.getElementById('theme-toggle');
         themeToggle.addEventListener('click', () => {
             const currentTheme = document.documentElement.getAttribute('data-theme');
@@ -440,12 +450,9 @@
             }
         });
 
-        // Event listeners
         document.getElementById('card-type').addEventListener('change', updateUIModeText);
         document.getElementById('reroll-btn').addEventListener('click', shuffleAndGenerate);
         document.getElementById('play-mode-btn').addEventListener('click', togglePlayMode);
-
-        // Initial Startup
         window.addEventListener('DOMContentLoaded', shuffleAndGenerate);
     </script>
 </body>
