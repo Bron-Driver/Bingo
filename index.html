@@ -5,229 +5,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Meeting & Icebreaker Bingo</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
         :root {
-            --bg-body: #ffffff;
-            --bg-container: #ffffff;
-            --text-main: #212529;
-            --text-sub: #6c757d;
-            --border-color: #dee2e6;
-            --bg-card: #f8f9fa;
-
-            --primary-color: #f07167;
-            --secondary-color: #00afb9;
-            --dab-color: #d8f3dc;
-            --dab-border: #b7e4c7;
+            --bg-card-default: #f8f9fa;
             --bg-free: #fed9b7;
             --text-free: #212529;
-            --text-dab: #1b4332;
+            --border-free: #f07167;
+            --bg-dabbed: #d8f3dc;
+            --text-dabbed: #1b4332;
+            --border-dabbed: #b7e4c7;
         }
 
         [data-theme="dark"] {
-            --bg-body: #121212;
-            --bg-container: #1e1e1e;
-            --text-main: #f8f9fa;
-            --text-sub: #a0a0a0;
-            --border-color: #333333;
-            --bg-card: #252525;
-
-            --dab-color: #1b4332;
-            --dab-border: #2d6a4f;
-            --text-dab: #d8f3dc;
+            --bg-card-default: #2b2b2b;
             --bg-free: #4a2810;
             --text-free: #ffddd2;
+            --border-free: #f07167;
+            --bg-dabbed: #1b4332;
+            --text-dabbed: #d8f3dc;
+            --border-dabbed: #2d6a4f;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-x: hidden;
             transition: background-color 0.3s, color 0.3s;
-        }
-
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            max-width: 600px;
-            margin-bottom: 15px;
-            gap: 15px;
-        }
-
-        .menu-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        select {
-            padding: 6px 12px;
-            font-size: 0.9rem;
-            border-radius: 5px;
-            border: 1px solid var(--border-color);
-            background-color: var(--bg-card);
-            color: var(--text-main);
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        h1 {
-            margin-bottom: 5px;
-            font-size: 2rem;
-            text-align: center;
-        }
-
-        p {
-            margin-top: 0;
-            margin-bottom: 20px;
-            color: var(--text-sub);
-            text-align: center;
-            max-width: 450px;
-            font-size: 0.95rem;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-
-        button {
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 1rem;
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        #theme-toggle {
-            background-color: transparent;
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            padding: 6px 12px;
-            font-size: 0.9rem;
-        }
-
-        #theme-toggle:hover {
-            background-color: var(--bg-card);
-        }
-
-        #reroll-btn {
-            background-color: var(--primary-color);
-        }
-
-        #reroll-btn:hover {
-            background-color: #df5e54;
-        }
-
-        #reroll-btn:disabled {
-            background-color: #e2a5a0;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        #play-mode-btn {
-            background-color: #6c757d;
-        }
-
-        #play-mode-btn:hover {
-            background-color: #5a6268;
-        }
-
-        #play-mode-btn.active {
-            background-color: var(--secondary-color);
-        }
-
-        .bingo-container {
-            background-color: var(--bg-container);
-            padding: 20px;
-            border-radius: 12px;
-            max-width: 600px;
-            width: 100%;
-            box-sizing: border-box;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-            transition: background-color 0.3s;
-        }
-
-        /* Dynamic Prompt Banner above the grid */
-        .prompt-banner {
-            display: none;
-            text-align: center;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--secondary-color);
-            margin-bottom: 15px;
-            padding: 8px;
-            background-color: var(--bg-card);
-            border-radius: 6px;
-            border: 1px dashed var(--border-color);
-        }
-
-        .header-row {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            text-align: center;
-            margin-bottom: 5px;
-        }
-
-        .header-letter {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            margin: 0;
+            min-height: 100vh;
         }
 
         .bingo-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
+            gap: 8px;
         }
 
         .bingo-cell {
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background-color: var(--bg-card);
-            height: 115px;
-            padding: 8px;
+            background-color: var(--bg-card-default);
+            aspect-ratio: 1 / 1;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            font-size: 0.8rem;
+            font-size: calc(0.52rem + 0.38vw);
             line-height: 1.2;
+            padding: 6px;
             user-select: none;
-            position: relative;
             cursor: not-allowed;
-            transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+            transition: all 0.2s ease;
+            border: 1px solid var(--bs-border-color);
+        }
+
+        @media (max-width: 576px) {
+            .bingo-cell {
+                font-size: calc(0.42rem + 0.48vw);
+                padding: 3px;
+            }
         }
 
         .bingo-cell.free-space {
-            border: 2px dashed var(--primary-color);
-            background-color: var(--bg-free);
-            color: var(--text-free);
+            border: 2px dashed var(--border-free) !important;
+            background-color: var(--bg-free) !important;
+            color: var(--text-free) !important;
             font-weight: bold;
-            font-size: 0.9rem;
             cursor: pointer;
         }
 
         .bingo-cell.dabbed {
-            background-color: var(--dab-color);
-            border-color: var(--dab-border);
-            color: var(--text-dab);
+            background-color: var(--bg-dabbed) !important;
+            border-color: var(--border-dabbed) !important;
+            color: var(--text-dabbed) !important;
             font-weight: bold;
         }
 
@@ -236,46 +84,69 @@
         }
 
         body.play-mode-active .bingo-cell:hover:not(.dabbed) {
-            background-color: var(--border-color);
+            filter: brightness(0.9);
         }
     </style>
 </head>
 
-<body>
+<body class="bg-light text-dark">
 
-    <div class="top-bar">
-        <div class="menu-group">
-            <label for="card-type" style="font-weight: bold; font-size: 0.9rem;">Game Mode:</label>
-            <select id="card-type">
-                <option value="jargon">Boardroom Jargon</option>
-                <option value="icebreaker">Icebreaker</option>
-            </select>
+    <div class="container py-4" style="max-width: 650px;">
+        <!-- Top Toolbar Header Section -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <div class="d-flex align-items-center gap-2">
+                <label for="card-type" class="form-label mb-0 fw-bold small text-secondary">Mode:</label>
+                <select id="card-type" class="form-select form-select-sm fw-bold border-secondary-subtle">
+                    <option value="jargon">Boardroom Jargon</option>
+                    <option value="icebreaker">Icebreaker</option>
+                </select>
+            </div>
+            <button id="theme-toggle" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2">
+                <i class="bi bi-moon-stars"></i> <span>Dark Mode</span>
+            </button>
         </div>
-        <button id="theme-toggle">🌙 Dark Mode</button>
-    </div>
 
-    <h1 id="game-title">🎲 Dabbable Meeting Bingo</h1>
-    <p id="game-instructions">1. Generate a card. 2. Lock it to activate "Play Mode." 3. "Dab" squares during the
-        meeting!</p>
-
-    <div class="button-group">
-        <button id="reroll-btn">🔄 New Card</button>
-        <button id="play-mode-btn">🔒 Play / Lock Card</button>
-    </div>
-
-    <div class="bingo-container">
-        <!-- New Instruction Banner located right inside the container card -->
-        <div id="prompt-banner" class="prompt-banner">🔍 Find someone who...</div>
-
-        <div class="header-row">
-            <div class="header-letter">B</div>
-            <div class="header-letter">I</div>
-            <div class="header-letter">N</div>
-            <div class="header-letter">G</div>
-            <div class="header-letter">O</div>
+        <!-- Heading Text Section -->
+        <div class="text-center mb-4">
+            <h1 id="game-title" class="display-6 fw-bold text-primary mb-1">🎲 Boardroom Bingo</h1>
+            <p id="game-instructions" class="small text-secondary mx-auto" style="max-width: 450px;">
+                1. Roll a card. 2. Lock it to activate "Play Mode." 3. Watch the room closely and tap squares live!
+            </p>
         </div>
-        <div id="grid" class="bingo-grid"></div>
+
+        <!-- System Action Buttons Control Bar -->
+        <div class="d-flex justify-content-center gap-2 mb-4">
+            <button id="reroll-btn" class="btn btn-danger fw-bold d-flex align-items-center gap-2 px-4 shadow-sm">
+                <i class="bi bi-shuffle"></i> New Card
+            </button>
+            <button id="play-mode-btn" class="btn btn-secondary fw-bold d-flex align-items-center gap-2 px-4 shadow-sm">
+                <i class="bi bi-lock-fill"></i> Play / Lock Card
+            </button>
+        </div>
+
+        <!-- Main Card Canvas Interface Wrapper -->
+        <div class="card shadow-sm border-0 p-3 p-sm-4 bg-body">
+            <!-- Dynamic Subtitle Context Instruction Banner -->
+            <div id="prompt-banner" class="alert alert-info text-center py-2 fw-bold mb-3 shadow-sm border-0 d-none">
+                <i class="bi bi-search me-1"></i> Find someone who...
+            </div>
+
+            <!-- Standard Header Alphabetic Row Structure -->
+            <div class="row g-0 text-center mb-2 text-danger style-letters">
+                <div class="col fw-bold">B</div>
+                <div class="col fw-bold">I</div>
+                <div class="col fw-bold">N</div>
+                <div class="col fw-bold">G</div>
+                <div class="col fw-bold">O</div>
+            </div>
+
+            <!-- Programmatic Input Target Node Injection Area -->
+            <div id="grid" class="bingo-grid"></div>
+        </div>
     </div>
+
+    <!-- Bootstrap 5 JavaScript Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         const DECK_POOLS = {
@@ -309,7 +180,42 @@
                 "Value add",
                 "At the end of the day",
                 "Deep dive",
-                "Someone opens/closes a window or adjusts the blinds"
+                "Someone opens/closes a window or adjusts the blinds",
+                "Heavy sigh from across the room",
+                "Someone is aggressively typing on a laptop",
+                "\"Think outside the box\"",
+                "\"Win-win situation\"",
+                "Someone leaves the room to take a call",
+                "\"Get our ducks in a row\"",
+                "\"Boil the ocean\"",
+                "\"Run it up the flagpole\"",
+                "Someone brings up a point that was covered 5 minutes ago",
+                "\"On my radar\"",
+                "\"Slam dunk\"",
+                "A marker pen runs out of ink on the whiteboard",
+                "\"Keep me in the loop\"",
+                "\"Best practice\"",
+                "Someone adjustments their chair height mid-discussion",
+                "\"Buy-in from stakeholders\"",
+                "\"Across the board\"",
+                "An ambulance/siren blares past outside the window",
+                "\"It is what it is\"",
+                "\"Game changer\"",
+                "Someone check their physical watch or clock on the wall",
+                "\"Take ownership\"",
+                "\"Bandwidth issues\" (meaning workload)",
+                "Someone drinks water very loudly",
+                "\"Hit the ground running\"",
+                "\"helicopter view\"",
+                "\"No-brainer\"",
+                "Someone clears their throat dramatically",
+                "\"Action items\"",
+                "\"All hands on deck\"",
+                "\"Wheelhouse\"",
+                "Someone starts packing up their things early",
+                "\"Back to the drawing board\"",
+                "\"Core competency\"",
+                "Someone leans all the way back in their chair"
             ],
             icebreaker: [
                 "Has a pet that isn't a cat or a dog",
@@ -339,7 +245,41 @@
                 "Has a collection of something unusual",
                 "Prefers a physical book over an e-reader",
                 "Has successfully kept a houseplant alive for over a year",
-                "Has been to a music festival"
+                "Has been to a music festival",
+                "Has lived in more than 3 different cities",
+                "Can name all 5 Great Lakes",
+                "Has never seen a Star Wars movie",
+                "Can cook a signature dish without a recipe",
+                "Prefers savory snacks over sweet treats",
+                "Has done a bungee jump",
+                "Has a summer birthday (Jun - Aug)",
+                "Woke up before 6:00 AM today",
+                "Has an allotment or vegetable garden",
+                "Can successfully perform a magic trick",
+                "Has read more than 10 books this year",
+                "Has been on television or radio",
+                "Prefers early mornings over late nights",
+                "Owns more than 5 pairs of sneakers/trainers",
+                "Has visited at least 3 different continents",
+                "Doesn't have any social media accounts on their phone",
+                "Has a twin or has twin relatives",
+                "Is wearing a watch today",
+                "Can trace their ancestry back over 200 years",
+                "Has camped in a tent in the rain",
+                "Has built a piece of flat-pack furniture this month",
+                "Knows sign language or Morse code",
+                "Has a library card",
+                "Can name the current top track on the music charts",
+                "Has a hidden creative talent (painting, writing, etc.)",
+                "Has never had a cavity/filling",
+                "Has been to a professional sports game this year",
+                "Drinks more than 2 liters of water a day",
+                "Knows how to change a tire on a car",
+                "Has seen a play or musical in a theater recently",
+                "Has a collection of board games",
+                "Prefers spicy food over mild food",
+                "Has built a website or an application before",
+                "Can cross their eyes on command"
             ]
         };
 
@@ -364,14 +304,14 @@
 
             selectedItems.forEach((text) => {
                 const cell = document.createElement('div');
-                cell.classList.add('bingo-cell');
+                cell.classList.add('bingo-cell', 'rounded', 'shadow-sm');
 
                 if (text === "FREE SPACE") {
                     cell.innerHTML = "✨ FREE SPACE ✨";
                     cell.classList.add('free-space');
                     cell.classList.add('dabbed');
                 } else {
-                    cell.textContent = text; // Clean layout without repeating html formatting
+                    cell.textContent = text;
                 }
 
                 cell.addEventListener('click', () => handleCellDab(cell));
@@ -395,15 +335,17 @@
             if (playModeActive) {
                 rerollBtn.disabled = true;
                 menuSelect.disabled = true;
-                playBtn.innerHTML = '🔓 Playing... (Unlock)';
-                playBtn.classList.add('active');
+                playBtn.innerHTML = '<i class="bi bi-unlock-fill"></i> Playing...';
+                playBtn.classList.replace('btn-secondary', 'btn-info');
+                playBtn.classList.add('text-white');
                 body.classList.add('play-mode-active');
                 clearDabsExceptFreeSpace();
             } else {
                 rerollBtn.disabled = false;
                 menuSelect.disabled = false;
-                playBtn.innerHTML = '🔒 Play / Lock Card';
-                playBtn.classList.remove('active');
+                playBtn.innerHTML = '<i class="bi bi-lock-fill"></i> Play / Lock Card';
+                playBtn.classList.replace('btn-info', 'btn-secondary');
+                playBtn.classList.remove('text-white');
                 body.classList.remove('play-mode-active');
             }
         }
@@ -428,25 +370,28 @@
             if (selectedDeck === 'icebreaker') {
                 title.innerHTML = "🎲 Icebreaker Bingo";
                 instructions.innerHTML = "1. Roll a card. 2. Lock it. 3. Chat around the room to fill your board!";
-                banner.style.display = "block"; // Show "Find someone who..." banner
+                banner.classList.remove('d-none');
             } else {
                 title.innerHTML = "🎲 Boardroom Bingo";
                 instructions.innerHTML = "1. Roll a card. 2. Lock it. 3. Watch the room closely and tap squares live!";
-                banner.style.display = "none";  // Hide banner
+                banner.classList.add('d-none');
             }
             shuffleAndGenerate();
         }
 
-        // Theme Toggle
         const themeToggle = document.getElementById('theme-toggle');
         themeToggle.addEventListener('click', () => {
             const currentTheme = document.documentElement.getAttribute('data-theme');
             if (currentTheme === 'dark') {
                 document.documentElement.removeAttribute('data-theme');
-                themeToggle.innerHTML = '🌙 Dark Mode';
+                document.body.classList.replace('bg-dark', 'bg-light');
+                document.body.classList.replace('text-white', 'text-dark');
+                themeToggle.innerHTML = '<i class="bi bi-moon-stars"></i> <span>Dark Mode</span>';
             } else {
                 document.documentElement.setAttribute('data-theme', 'dark');
-                themeToggle.innerHTML = '☀️ Light Mode';
+                document.body.classList.replace('bg-light', 'bg-dark');
+                document.body.classList.replace('text-dark', 'text-white');
+                themeToggle.innerHTML = '<i class="bi bi-sun-fill"></i> <span>Light Mode</span>';
             }
         });
 
